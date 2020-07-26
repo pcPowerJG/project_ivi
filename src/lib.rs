@@ -64,7 +64,7 @@ pub mod deep_learning {
         float *_inputs = nullptr;
         float *_targets = nullptr;*/
     }
-    impl Layer {
+    impl Layer {        
         pub fn new(inputs_: Vec<usize>, outputs_: Vec<usize>, learn_rate: Vec<f32>) -> Layer {            
             let mut nyrs: Vec<Neyron> = Vec::new();
             for i in 0..inputs_.len() {
@@ -178,7 +178,7 @@ pub mod deep_learning {
             self.feed_forwarding(false)
         }
         // радиус матрицы (ширина), матрица, позицияХ, позицияY, изображение, ширина изображения, до конца?
-        pub fn convolutional(&self, 
+        pub fn convolutional_extern_matrix(&self, 
             rectagle_radius: usize, matrix: &Vec<f32>, 
             mut positionX: usize, mut positionY: usize, 
             picture: &Vec<f32>, picture_wight: usize
@@ -206,7 +206,53 @@ pub mod deep_learning {
                 }
                 positionX = 0;
                 positionY += hight;
-            }
+            }            
+            //println!("\n{:?}", matrix_coordinate.clone());
+            //println!("*****pixels*filters*****\n{:?}", con_vector);
+            let mut new_picture: Vec<f32> = Vec::new();
+            let mut summ: f32 = 0.0;
+            for index in 0..con_vector.len() {                
+                if (index % (rectagle_radius * rectagle_radius) == 0) && (index != 0) {
+                    new_picture.push(summ);
+                    summ = 0.0;
+                } 
+                summ += con_vector[index].clone();
+            } new_picture.push(summ);
+            //println!("new picture:\nlen: {}\npixel: {:?}", new_picture.len(), new_picture);
+            new_picture
+        }
+
+        pub fn convolutional(&self, 
+            rectagle_radius: usize,
+            mut positionX: usize, mut positionY: usize, 
+            picture: &Vec<f32>, picture_wight: usize
+        ) -> Vec<f32> {            
+            let mut matrix: Vec<f32> = Vec::new();
+            self.neyrons[0].matrix_to_one_string_array(&mut matrix);
+            let mut matrix_coordinate: Vec<usize> = Vec::new();
+            let hight: usize = picture.len() / picture_wight.clone();                      
+            let mut con_vector: Vec<f32> = Vec::new();            
+            for h in 0..(hight-rectagle_radius + 1) {
+                for w in 0..(picture_wight-rectagle_radius+1) {
+                    for y in 0..rectagle_radius {                    
+                            for x in 0..rectagle_radius {
+                                //println!("into for: pos x - {}, pos y - {}", positionX, positionY);
+                                matrix_coordinate.push(
+                                    positionY + positionX
+                                );                                
+                                con_vector.push(matrix[x + y * rectagle_radius] * picture[positionX + positionY]);
+                                positionX += 1;                            
+                            }
+                        positionX -= rectagle_radius;
+                        positionY += picture_wight;                    
+                    }
+                    positionY -= picture_wight * rectagle_radius;
+                    //println!(" after for:\n pos x - {}, pos y - {}", positionX, positionY);                    
+                    positionX +=1;                
+                }
+                positionX = 0;
+                positionY += hight;
+            }            
             //println!("\n{:?}", matrix_coordinate.clone());
             //println!("*****pixels*filters*****\n{:?}", con_vector);
             let mut new_picture: Vec<f32> = Vec::new();
@@ -223,7 +269,7 @@ pub mod deep_learning {
         }
         // FILE SYSTEM
         /* */
-        pub fn save_to_file<'a>(&self, file_name: &'a str) -> Result<bool, &str> {
+        pub fn save_to_file<'a>(&self, file_name: &'a str) -> Result<bool, &'a str> {
             // NEYRON: 
             //pub fn save_to_string(&self) -> String {
                 // output: this neyron to text_format + '_' symbol            
@@ -249,7 +295,7 @@ pub mod deep_learning {
             }
             Ok(true)
         }
-        pub fn load_from_file<'a>(&mut self, file_path: &'a str) -> Result<bool, &str> {
+        pub fn load_from_file<'a>(&mut self, file_path: &'a str) -> Result<bool, &'a str> {
             //pub fn import_from_string(&mut self, sting_load: String) {
             let mut content: String = String::new();
             let mut file: File = match File::open(file_path) {
@@ -298,11 +344,18 @@ pub mod deep_learning {
     impl Neyron{
         pub fn get_errors(&self) -> Vec<f32> { self.errors.clone() }
         pub fn get_matrix(&self) -> Vec<Vec<f32>> { self.matrix.clone() }
+        pub fn matrix_to_one_string_array(&self, vector_: &mut Vec<f32>) {
+            for _i in 0..(self.in_+1) {                
+                for _j in 0..self.out_ {                    
+                    vector_.push(self.matrix[_i][_j]);
+                }
+            }
+        }
         pub fn get_in_count(&self) -> usize { self.in_.clone() }
         pub fn get_out_count(&self) -> usize { self.out_.clone() }
         pub fn set_learn_rate(&mut self, learn_rate: f32) {
             self.learn_rate = learn_rate;
-        }
+        }        
         pub fn new(input: usize, output: usize, learn_rate: f32) -> Neyron {
             Neyron { 
                 in_: input,

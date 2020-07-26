@@ -45,6 +45,31 @@ fn main(){
     );
     //layer.save_to_file("file.csb");
     //layer.load_from_file("file.csb");
+    /*layer = Layer::new(
+        vec![2],
+        vec![3],
+        vec![0.5]
+    );
+    let picture: Vec<f32> = vec![
+            0.0, 0.1, 0.2, 0.3,
+            0.4, 0.5, 0.6, 0.7,
+            0.8, 0.9, 0.10, 0.11,
+            0.12, 0.13, 0.14, 0.15
+        ];
+    println!("{:?}", layer.convolutional(3, 0, 0, &picture, 4));*/
+    /*
+    // радиус матрицы (ширина), матрица, позицияХ, позицияY, изображение, ширина изображения, до конца?
+    pub fn convolutional(&mut self, 
+        rectagle_radius: usize, 
+        matrix: &Vec<f32>, 
+        mut positionX: usize, 
+        mut positionY: usize, 
+        picture: &Vec<f32>, 
+        picture_wight: usize
+    )
+    */        
+    //println!("new picture[\n {:?}\n]", a1.convolutional(2, &matrix, 0, 0, &picture, 4));
+    //convolutional
     //layer.println();    
     //panic!("");
     let mut file = match File::open("mnist_test.csv") {
@@ -133,27 +158,5 @@ fn main(){
            Ok(A) => {},
            Err(e) => panic!(""), 
        }
-    }
-    let picture: Vec<f32> = vec![
-            0.0, 0.1, 0.2, 0.3,
-            0.4, 0.5, 0.6, 0.7,
-            0.8, 0.9, 0.10, 0.11,
-            0.12, 0.13, 0.14, 0.15
-        ];
-    let mut matrix: Vec<f32> = vec![
-        1.0, 1.0,
-        1.0, 1.0
-    ];
-    /*
-     // радиус матрицы (ширина), матрица, позицияХ, позицияY, изображение, ширина изображения, до конца?
-        pub fn convolutional(&mut self, 
-            rectagle_radius: usize, 
-            matrix: &Vec<f32>, 
-            mut positionX: usize, 
-            mut positionY: usize, 
-            picture: &Vec<f32>, 
-            picture_wight: usize
-        )
-        */        
-        //println!("new picture[\n {:?}\n]", a1.convolutional(2, &matrix, 0, 0, &picture, 4));
+    }    
 }
